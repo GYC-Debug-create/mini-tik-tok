@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -15,8 +16,11 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+@Slf4j
 @RequiredArgsConstructor
 public class RequestLogFilter extends OncePerRequestFilter {
+
+    private static final int MAX_BODY_CACHE_BYTES = 8192;
 
     private final RequestLogService requestLogService;
 
@@ -27,9 +31,15 @@ public class RequestLogFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        // CORS 预检不写 request_logs，避免噪声
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         long start = System.currentTimeMillis();
-        ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
+        ContentCachingRequestWrapper wrappedRequest =
+                new ContentCachingRequestWrapper(request, MAX_BODY_CACHE_BYTES);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
 
         try {
@@ -50,8 +60,7 @@ public class RequestLogFilter extends OncePerRequestFilter {
                         costMs
                 );
             } catch (Exception ex) {
-                // 写库失败不影响业务响应
-                ex.printStackTrace();
+                log.warn("request_logs 写入失败: {} {}", request.getMethod(), request.getRequestURI(), ex);
             }
             wrappedResponse.copyBodyToResponse();
         }

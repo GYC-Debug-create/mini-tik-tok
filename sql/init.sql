@@ -127,3 +127,5 @@ INSERT IGNORE INTO likes (user_id, video_id) VALUES
 INSERT IGNORE INTO visit_records (user_id, video_id, viewed_at) VALUES
     (1, 1, '2026-05-10 10:00:00'),   -- 最早
     (1, 2, '2026-05-10 10:05:00');   -- 最近 → 当前视频
+
+-- 答辩/联调：request_logs 查询示例见同目录 monitoring-queries.sql

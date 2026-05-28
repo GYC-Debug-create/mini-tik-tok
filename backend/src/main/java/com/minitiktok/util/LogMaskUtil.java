@@ -13,6 +13,8 @@ public final class LogMaskUtil {
             Pattern.compile("(\"token\"\\s*:\\s*)\"[^\"]*\"", Pattern.CASE_INSENSITIVE);
     private static final Pattern AUTHORIZATION_HEADER =
             Pattern.compile("(authorization\\s*[:=]\\s*)[^,\\s}]+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern BEARER_TOKEN =
+            Pattern.compile("(Bearer\\s+)[A-Za-z0-9._\\-]+", Pattern.CASE_INSENSITIVE);
 
     private LogMaskUtil() {
     }
@@ -24,6 +26,7 @@ public final class LogMaskUtil {
         String masked = PASSWORD_FIELD.matcher(raw).replaceAll("$1\"***\"");
         masked = TOKEN_FIELD.matcher(masked).replaceAll("$1\"***\"");
         masked = AUTHORIZATION_HEADER.matcher(masked).replaceAll("$1***");
+        masked = BEARER_TOKEN.matcher(masked).replaceAll("$1***");
         return masked;
     }
 

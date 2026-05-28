@@ -13,7 +13,7 @@
 | `util/JwtUtil.java` | 生成/解析 JWT（读 `application.yml` 的 `jwt.*`） |
 | `config/JwtProperties.java` | 绑定 jwt.secret、expiration-days |
 | `filter/JwtAuthFilter.java` | 校验 Bearer Token，注入 `ApiConstants.ATTR_USER_ID` |
-| `config/AuthFilterConfig.java` | 注册 JwtAuthFilter，**Order = RequestLogFilter + 1** |
+| `config/AuthFilterConfig.java` | 注册 JwtAuthFilter，**Order = `FilterOrders.JWT_AUTH`**（见 A 提供的 `config.FilterOrders`） |
 
 ## 与 A 的边界
 
@@ -63,7 +63,7 @@
 ## Filter 顺序（全组遵守）
 
 ```
-RequestLogFilter（A，最外层）
-  → JwtAuthFilter（B）
+RequestLogFilter（A，Order = FilterOrders.REQUEST_LOG）
+  → JwtAuthFilter（B，Order = FilterOrders.JWT_AUTH）
     → Controller（B/C/D）
 ```

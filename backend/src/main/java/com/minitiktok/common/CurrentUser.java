@@ -1,6 +1,5 @@
 package com.minitiktok.common;
 
-import com.minitiktok.common.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**

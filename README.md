@@ -8,10 +8,10 @@
 
 | 模块 | 负责人 | 状态 |
 |------|--------|------|
-| 需求/技术设计 v2.1 | 全组 | ✅ 已入仓（工作区可能有未提交微调） |
-| `sql/init.sql` | A | ✅ |
-| 后端基础设施（Entity/Mapper/日志/CORS/Result） | A | ✅ |
-| `GET /api/health` | A | ✅ |
+| 需求/技术设计 v2.1 | 全组 | ✅ 已入仓 |
+| `sql/init.sql` + `monitoring-queries.sql` | A | ✅ |
+| 后端基础设施（Entity/Mapper/日志/CORS/Result/PageResult） | A | ✅ |
+| `GET /api/health`（含 DB 状态） | A | ✅ |
 | 认证 + JWT（3 接口 + Filter） | B | ⬜ 待实现 |
 | 视频 3 接口 | C | ⬜ 待实现 |
 | Feed + 点赞 4 接口 | D | ⬜ 待实现 |
@@ -25,7 +25,9 @@
 |------|------|
 | A | [`docs/MEMBER-A-后端基础交接.md`](docs/MEMBER-A-后端基础交接.md) |
 | B | [`docs/MEMBER-B-认证与JWT.md`](docs/MEMBER-B-认证与JWT.md) |
-| 全组 | [`docs/团队分工与提交清单.md`](docs/团队分工与提交清单.md) |
+| C | [`docs/MEMBER-C-视频管理.md`](docs/MEMBER-C-视频管理.md) |
+| D | [`docs/MEMBER-D-Feed与点赞.md`](docs/MEMBER-D-Feed与点赞.md) |
+| 全组 | [`docs/团队分工与提交清单.md`](docs/团队分工与提交清单.md) · Postman：[`docs/postman/`](docs/postman/) |
 
 分工基线：`需求规格说明书_v2.1_P0-only开发冻结版.md` §15、`技术设计文档_v2.1_P0-only开发冻结版.md` §13。
 
@@ -55,7 +57,9 @@ cd backend
 mvn spring-boot:run
 ```
 
-- 健康检查：`GET http://localhost:8080/api/health`
+- 健康检查：`GET http://localhost:8080/api/health`（含 `database: up/down`）
+- 日志验收 SQL：见 `sql/monitoring-queries.sql`
+- Postman：导入 `docs/postman/miniTikTok-P0.postman_collection.json`
 - 种子账号（联调 B 登录后）：`alice` / `123456`
 
 ---
@@ -76,23 +80,9 @@ mvn spring-boot:run
 
 ## Git 协作
 
-- 已有首次提交：`feat(infra): A 后端骨架、SQL、文档 v2.1 与全组待办说明`。
 - **不要提交**：`out/`、`backend/target/`、`.idea/`、`application-local.yml`。
-
-建议本次一并提交（文档对齐 + 小修复）：
-
-```bash
-git add "需求规格说明书_v2.1_P0-only开发冻结版.md"
-git add "技术设计文档_v2.1_P0-only开发冻结版.md"
-git add sql/init.sql backend/src/main/java/com/minitiktok/filter/RequestLogFilter.java
-git add docs/ README.md
-git status
-git commit -m "docs: 对齐 A/B 分工并合并原有关键说明；fix 日志 Filter 与 init 版本号"
-git remote add origin <Gitee URL>   # 若尚未配置
-git push -u origin master
-```
-
-队友建议从 `feat/auth-b` 等分支开发，合并前联调。
+- 队友从 `feat/auth-b`、`feat/video-c` 等分支开发，合并前联调。
+- 历史提交：`849c36f`（骨架）、`f5c0fc9`（A/B 分工文档对齐）。
 
 ---
 
@@ -103,6 +93,7 @@ git push -u origin master
 | `需求规格说明书_v2.1_*.md` | 全组 | 需求基线 |
 | `技术设计文档_v2.1_*.md` | 全组 | 技术基线 |
 | `sql/init.sql` | A | 建库脚本 |
+| `sql/monitoring-queries.sql` | A | 答辩用 `request_logs` 查询示例 |
 | `backend/` | A 骨架；B/C/D 填业务 | Spring Boot |
 | `frontend/` | E（待建） | Vue3 |
 | `docs/MEMBER-*.md` | 各成员 | 交接说明 |

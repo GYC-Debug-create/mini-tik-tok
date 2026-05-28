@@ -15,7 +15,8 @@
 | `RequestLogFilter` + `RequestLogService` | 前端（E） |
 | `CorsConfig`、`MybatisPlusConfig` | |
 | `ApiConstants`（公开路径白名单，B 只读） | |
-| `CurrentUser`、`VideoConstants` | |
+| `CurrentUser`、`VideoConstants`、`PageResult` | |
+| `FilterOrders`、`sql/monitoring-queries.sql`、Postman 集合骨架 | |
 | `GET /api/health` 冒烟接口 | |
 | 根目录聚合 `pom.xml`（方便 IDEA 识别模块） | |
 
@@ -56,7 +57,7 @@ mvn spring-boot:run
 
 1. **包名**统一 `com.minitiktok`，禁止再建 `douyinlite` 等第二套。  
 2. **业务按人分包**：B→`auth`+JWT Filter；C→视频；D→Feed/Like。  
-3. **不要改** `RequestLogFilter` 的 Order（最外层）。B 的 JwtAuthFilter 必须在其后。  
+3. **不要改** `RequestLogFilter` 的 Order（`FilterOrders.REQUEST_LOG`）。B 使用 `FilterOrders.JWT_AUTH`。  
 4. 受保护接口取用户：`CurrentUser.requireUserId(request)`。  
 5. 抛错用 `BusinessException(403, "…")` 等，走统一 JSON。  
 6. 公开路径只改 `ApiConstants.isPublicPath()`，改前在群里说一声。
@@ -67,7 +68,8 @@ mvn spring-boot:run
 
 - [x] 骨架、Entity、Mapper、日志 Filter、CORS  
 - [x] 首次 `git commit`（`849c36f`）  
-- [ ] 提交文档 A/B 分工对齐与小修复后 push Gitee，通知 B 拉分支开始 `auth` 包  
+- [ ] 提交并 push 本次基础设施增强（`PageResult`、`FilterOrders`、健康检查 DB、C/D 交接、Postman）  
+- [ ] 通知 B 拉分支开始 `auth` 包  
 - [ ] 全组对照 [`实现状态与待办清单.md`](实现状态与待办清单.md) 更新各接口 ⬜/✅  
 - [ ] B 提交 JWT 后，联调 `request_logs` 脱敏  
 - [ ] 第 2 周：C/D 联调时你只 code review，少改别人 Controller  

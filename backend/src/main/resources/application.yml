@@ -1,3 +1,4 @@
+# 本地密码建议：复制 application-example.yml → application-local.yml（已 gitignore）
 server:
   port: 8080
 
