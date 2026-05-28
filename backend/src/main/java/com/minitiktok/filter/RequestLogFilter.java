@@ -36,18 +36,23 @@ public class RequestLogFilter extends OncePerRequestFilter {
             filterChain.doFilter(wrappedRequest, wrappedResponse);
         } finally {
             int costMs = (int) (System.currentTimeMillis() - start);
-            Long userId = (Long) wrappedRequest.getAttribute(ApiConstants.ATTR_USER_ID);
-            String requestParams = buildRequestParams(wrappedRequest);
-            String responseBody = extractResponseBody(wrappedResponse);
-            requestLogService.save(
-                    userId,
-                    wrappedRequest.getMethod(),
-                    wrappedRequest.getRequestURI(),
-                    requestParams,
-                    wrappedResponse.getStatus(),
-                    responseBody,
-                    costMs
-            );
+            try {
+                Long userId = (Long) wrappedRequest.getAttribute(ApiConstants.ATTR_USER_ID);
+                String requestParams = buildRequestParams(wrappedRequest);
+                String responseBody = extractResponseBody(wrappedResponse);
+                requestLogService.save(
+                        userId,
+                        wrappedRequest.getMethod(),
+                        wrappedRequest.getRequestURI(),
+                        requestParams,
+                        wrappedResponse.getStatus(),
+                        responseBody,
+                        costMs
+                );
+            } catch (Exception ex) {
+                // 写库失败不影响业务响应
+                ex.printStackTrace();
+            }
             wrappedResponse.copyBodyToResponse();
         }
     }

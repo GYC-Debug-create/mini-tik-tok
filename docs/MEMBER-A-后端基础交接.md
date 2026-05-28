@@ -9,7 +9,7 @@
 
 | A 负责（已提交或维护） | A 不负责（队友填代码） |
 |------------------------|------------------------|
-| Maven 工程、`application.yml` 模板 | `AuthController`、注册登录逻辑 |
+| Maven 工程、`application.yml` 模板（含数据源与 `jwt.*` 供 B 读取） | `AuthController`、注册登录逻辑 |
 | 5 张表 Entity + Mapper | `JwtUtil`、`JwtAuthFilter`（**归 B**） |
 | `Result`、`GlobalExceptionHandler`、`BusinessException` | `VideoController` / `FeedController`（C/D） |
 | `RequestLogFilter` + `RequestLogService` | 前端（E） |
@@ -66,8 +66,8 @@ mvn spring-boot:run
 ## A 本周 checklist
 
 - [x] 骨架、Entity、Mapper、日志 Filter、CORS  
-- [ ] 完成首次 `git commit`（含 `.gitignore` 与文档最新版，见根 `README.md`「Git 协作」）  
-- [ ] 推 Gitee，通知 B 拉分支开始 `auth` 包  
+- [x] 首次 `git commit`（`849c36f`）  
+- [ ] 提交文档 A/B 分工对齐与小修复后 push Gitee，通知 B 拉分支开始 `auth` 包  
 - [ ] 全组对照 [`实现状态与待办清单.md`](实现状态与待办清单.md) 更新各接口 ⬜/✅  
 - [ ] B 提交 JWT 后，联调 `request_logs` 脱敏  
 - [ ] 第 2 周：C/D 联调时你只 code review，少改别人 Controller  

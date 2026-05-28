@@ -74,34 +74,25 @@ mvn spring-boot:run
 
 ---
 
-## Git 协作（当前仓库状态）
+## Git 协作
 
-- 仓库已 `git init`，**尚未有任何 commit**。
-- 大部分文件已在暂存区（`git add` 过）；**还需补 add**：
-  - `.gitignore`（忽略 `target/`、`out/`、`.idea/` 等）
-  - 工作区已修改的 3 个文件：两份 v2.1 规格/设计文档、`docs/团队分工与提交清单.md`
-- **不要提交**：`out/`（IDEA 编译输出）、`backend/target/`、`.idea/`、`application-local.yml`
+- 已有首次提交：`feat(infra): A 后端骨架、SQL、文档 v2.1 与全组待办说明`。
+- **不要提交**：`out/`、`backend/target/`、`.idea/`、`application-local.yml`。
 
-建议 A 首次提交（在仓库根目录执行）：
+建议本次一并提交（文档对齐 + 小修复）：
 
 ```bash
-git add .gitignore
-git add "docs/团队分工与提交清单.md"
-git add "技术设计文档_v2.1_P0-only开发冻结版.md"
 git add "需求规格说明书_v2.1_P0-only开发冻结版.md"
-git add docs/实现状态与待办清单.md
-git status   # 确认无 out/、target/
-git commit -m "feat(infra): A 后端骨架、SQL、文档 v2.1 与 B/C/D/E 待办说明"
-```
-
-推远程（配置 Gitee 后）：
-
-```bash
-git remote add origin <你的仓库 URL>
+git add "技术设计文档_v2.1_P0-only开发冻结版.md"
+git add sql/init.sql backend/src/main/java/com/minitiktok/filter/RequestLogFilter.java
+git add docs/ README.md
+git status
+git commit -m "docs: 对齐 A/B 分工并合并原有关键说明；fix 日志 Filter 与 init 版本号"
+git remote add origin <Gitee URL>   # 若尚未配置
 git push -u origin master
 ```
 
-队友建议从 `dev` 或 `feat/xxx` 分支开发，合并前 Pull Request / 联调。
+队友建议从 `feat/auth-b` 等分支开发，合并前联调。
 
 ---
 

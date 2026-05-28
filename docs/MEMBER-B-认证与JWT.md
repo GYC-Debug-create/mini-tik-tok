@@ -22,8 +22,9 @@
 | `users` 表、`User` 实体、`UserMapper` | A 已建，B **只调用** Mapper |
 | `ApiConstants.isPublicPath()` | A 已建，B **只读**；新增匿名接口找 A 加白名单 |
 | `CurrentUser.requireUserId(request)` | A 已建，依赖你在 Filter 里设置的 `currentUserId` |
-| `RequestLogFilter` | A 已实现，**不要改 Order** |
+| `RequestLogFilter` | A **主导**实现；B 联调时确认 `request_logs` 不含明文密码、完整 Token |
 | `Result` / `BusinessException` | A 已实现，Controller 直接用 |
+| 登录成功响应 | B 负责：`data.token` + `userId` + `username`（见下文示例） |
 
 ## JwtAuthFilter 要点
 
