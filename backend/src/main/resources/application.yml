@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: mini-tiktok-backend
+  datasource:
+    url: jdbc:mysql://localhost:3306/douyin_lite?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+
+# 以下 jwt 配置供成员 B 的 JwtUtil 使用（B 实现认证模块时读取）
+jwt:
+  secret: <REDACTED>
+  expiration-days: 7
+
+app:
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://127.0.0.1:5173

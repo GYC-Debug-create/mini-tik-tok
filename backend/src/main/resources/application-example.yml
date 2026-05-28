@@ -1,0 +1,8 @@
+# 复制本文件为 application-local.yml（已加入 .gitignore），再修改数据库密码
+spring:
+  datasource:
+    username: root
+    password: your_mysql_password
+
+jwt:
+  secret: <REDACTED>
