@@ -21,3 +21,6 @@ Thumbs.db
 # Env
 .env
 *.log
+
+# Reasonix workspace metadata
+.reasonix/

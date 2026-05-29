@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "miniTikTok P0",
-    "description": "课程作业 P0 接口集合。登录后将 token 写入集合变量 {{token}}。",
+    "description": "课程作业 P0 接口集合。登录后自动将 token 写入集合变量 {{token}}。\n\n使用步骤：\n1. 先「POST register」注册新用户（或直接用种子用户 alice/123456）\n2. 「POST login」登录 → 自动设置 token\n3. 依次测试各受保护接口",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -18,36 +18,248 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/api/health"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('健康检查返回 200', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().code).to.eq(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "B-认证（待实现）",
+      "name": "B-认证（已完成）",
       "item": [
         {
           "name": "POST register",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"test01\",\n  \"password\": \"123456\"\n}"
+              "raw": "{\n  \"username\": \"test_{{$randomUserName}}\",\n  \"password\": \"123456\"\n}"
             },
             "url": "{{baseUrl}}/api/auth/register"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('注册成功 → 201', () => {",
+                  "    pm.response.to.have.status(201);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.code).to.eq(201);",
+                  "    pm.expect(json.message).to.eq('注册成功');",
+                  "    pm.expect(json.data.id).to.be.a('number');",
+                  "    pm.expect(json.data.username).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "POST login",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"123456\"\n}"
             },
             "url": "{{baseUrl}}/api/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('登录成功 → 200 + token', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.code).to.eq(200);",
+                  "    pm.expect(json.message).to.eq('登录成功');",
+                  "    pm.expect(json.data.token).to.be.a('string');",
+                  "    pm.expect(json.data.userId).to.be.a('number');",
+                  "    pm.expect(json.data.username).to.eq('alice');",
+                  "    // 自动设置 token 到集合变量",
+                  "    pm.collectionVariables.set('token', json.data.token);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/logout"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('注销成功 → 200', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().code).to.eq(200);",
+                  "    pm.expect(pm.response.json().message).to.eq('已退出登录');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "C-视频管理（待实现）",
+      "item": [
+        {
+          "name": "POST 发布视频",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"测试视频标题\",\n  \"videoUrl\": \"https://www.w3schools.com/html/mov_bbb.mp4\"\n}"
+            },
+            "url": "{{baseUrl}}/api/videos"
           }
+        },
+        {
+          "name": "GET 我的视频（分页）",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/users/me/videos?page=1&pageSize=10"
+          }
+        },
+        {
+          "name": "DELETE 删除视频",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/videos/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "D-推荐与点赞（待实现）",
+      "item": [
+        {
+          "name": "GET 下一个推荐",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/feed/videos/next"
+          }
+        },
+        {
+          "name": "GET 上一个视频",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/feed/videos/previous?currentVideoId=1"
+          }
+        },
+        {
+          "name": "GET 历史方向下一个",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/feed/videos/forward?currentVideoId=1"
+          }
+        },
+        {
+          "name": "POST 点赞",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/videos/1/like"
+          }
+        }
+      ]
+    },
+    {
+      "name": "E-鉴权异常场景",
+      "item": [
+        {
+          "name": "无Token访问受保护接口 → 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/feed/videos/next"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('无 Token 返回 401', () => {",
+                  "    pm.response.to.have.status(401);",
+                  "    pm.expect(pm.response.json().code).to.eq(401);",
+                  "    pm.expect(pm.response.json().message).to.include('未登录');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "无效Token访问 → 401",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer invalid-token-here" }
+            ],
+            "url": "{{baseUrl}}/api/videos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('无效 Token 返回 401', () => {",
+                  "    pm.response.to.have.status(401);",
+                  "    pm.expect(pm.response.json().code).to.eq(401);",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     }

@@ -1,0 +1,4 @@
+# 测试配置 — 无需数据库，纯 Mock 测试
+jwt:
+  secret: <REDACTED>
+  expiration-days: 7
