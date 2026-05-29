@@ -9,7 +9,6 @@ const request = axios.create({
 
 // 请求拦截器：发请求前自动注入 Token
 request.interceptors.request.use(
-  // 成功
   (config) => {
     const token = getToken()
     if (token) {
@@ -17,7 +16,6 @@ request.interceptors.request.use(
     }
     return config
   },
-  // 失败
   (error) => Promise.reject(error)
 )
 

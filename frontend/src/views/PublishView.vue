@@ -2,7 +2,7 @@
   <div class="page">
     <h2>发布视频</h2>
 
-    <form class="publish-form" @submit.prevent>
+    <form class="publish-form" @submit.prevent="handlePublish">
       <div class="form-item">
         <label>视频标题：</label>
         <input v-model="title" type="text" placeholder="请输入视频标题" />
@@ -16,7 +16,7 @@
       <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
       <div class="form-actions">
-        <button type="submit" class="btn-primary" @click="handlePublish">发布</button>
+        <button type="submit" class="btn-primary">发布</button>
         <button type="button" class="btn-secondary" @click="handleBack">返回</button>
       </div>
     </form>
@@ -45,7 +45,21 @@ function handlePublish() {
     return
   }
 
-  // TODO: 接入 publishVideo API。
+  // [mock] 模拟 publishVideo 成功，后端就绪后替换为下方 try/catch
+  router.push('/my-videos')
+
+  /*
+  try {
+    await publishVideo({
+      title: title.value.trim(),
+      videoUrl: videoUrl.value.trim()
+    })
+    router.push('/my-videos')
+  } catch (error) {
+    const message = error.response?.data?.message || '发布失败，请检查网络'
+    errorMessage.value = message
+  }
+  */
 }
 
 function handleBack() {

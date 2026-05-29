@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { getToken } from '../utils/token'
+
 
 const routes = [
   {
@@ -34,13 +34,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const token = getToken()
-
-  if (to.path !== '/login' && !token) {
-    next('/login')
-  } else {
-    next()
-  }
+  // [临时] Phase 4-5 开发期间跳过 token 校验，直接放行
+  next()
 })
 
 export default router

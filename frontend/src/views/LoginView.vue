@@ -62,7 +62,11 @@ async function handleSubmit() {
       password: form.password
     })
 
-    const token = response.data.data.token
+    const token = response.data?.data?.token
+    if (!token) {
+      errorMessage.value = '登录响应缺少 token'
+      return
+    }
     setToken(token)
     router.push('/feed')
   } catch (error) {
