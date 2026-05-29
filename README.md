@@ -12,7 +12,7 @@
 | `sql/init.sql` + `monitoring-queries.sql` | A | ✅ |
 | 后端基础设施（Entity/Mapper/日志/CORS/Result/PageResult） | A | ✅ |
 | `GET /api/health`（含 DB 状态） | A | ✅ |
-| 认证 + JWT（3 接口 + Filter） | B | ⬜ 待实现 |
+| 认证 + JWT（3 接口 + Filter） | B | ✅ |
 | 视频 3 接口 | C | ⬜ 待实现 |
 | Feed + 点赞 4 接口 | D | ⬜ 待实现 |
 | `frontend/` | E | ⬜ 待建 |
