@@ -1,8 +1,3 @@
-<!--
-  PublishView.vue — 发布视频页
-  职责：提供表单让用户填写标题和视频URL，提交后调用发布接口
-  小步推进：静态骨架 → v-model 绑定 → 校验 → 发布 API → mock
--->
 <template>
   <div class="page">
     <h2>发布视频</h2>
@@ -50,7 +45,7 @@ function handlePublish() {
     return
   }
 
-  // 下一步：调用 publishVideo API
+  // TODO: 接入 publishVideo API。
 }
 
 function handleBack() {
