@@ -18,6 +18,7 @@
 | `CurrentUser`、`VideoConstants`、`PageResult` | |
 | `FilterOrders`、`sql/monitoring-queries.sql`、Postman 集合骨架 | |
 | `GET /api/health` 冒烟接口 | |
+| （B 已交付）`auth` + JWT Filter | 见 `MEMBER-B-使用文档.md`，A 只验收日志与 Filter 顺序 |
 | 根目录聚合 `pom.xml`（方便 IDEA 识别模块） | |
 
 ---
@@ -67,12 +68,24 @@ mvn spring-boot:run
 ## A 本周 checklist
 
 - [x] 骨架、Entity、Mapper、日志 Filter、CORS  
-- [x] 首次 `git commit`（`849c36f`）  
-- [ ] 提交并 push 本次基础设施增强（`PageResult`、`FilterOrders`、健康检查 DB、C/D 交接、Postman）  
-- [ ] 通知 B 拉分支开始 `auth` 包  
-- [ ] 全组对照 [`实现状态与待办清单.md`](实现状态与待办清单.md) 更新各接口 ⬜/✅  
-- [ ] B 提交 JWT 后，联调 `request_logs` 脱敏  
+- [x] 基础设施增强（`bf6705b`）  
+- [x] 成员 B 已合并认证模块（`1434b21`），见 [`MEMBER-B-使用文档.md`](MEMBER-B-使用文档.md)  
+- [ ] **日志联调**（与 B，约 15 分钟，见下节）  
+- [ ] 通知 C/D 拉 `master`，按 Postman 先 login 再开发  
 - [ ] 第 2 周：C/D 联调时你只 code review，少改别人 Controller  
+
+---
+
+## 日志联调（B 已上线后，A 主导验收）
+
+1. 启动：`cd backend && mvn spring-boot:run`（先执行 `sql/init.sql`）。  
+2. Postman：`POST /api/auth/login`（alice / 123456）→ 确认集合变量 `token` 有值。  
+3. 无 Token：`GET /api/feed/videos/next` → **401**，且 `request_logs` 新增一行（`user_id` 为 NULL）。  
+4. 带 Token：同上请求 → 当前为 **404**（D 未实现属正常）；`user_id` 应为登录用户 ID。  
+5. 查表：`sql/monitoring-queries.sql` 或  
+   `SELECT response_body, request_params FROM request_logs ORDER BY id DESC LIMIT 3;`  
+   → `password`、`token` 字段值应为 `***`，不得出现明文。  
+6. 通过后，在 [`实现状态与待办清单.md`](实现状态与待办清单.md) §4 勾选「日志联调」。
 
 ---
 

@@ -4,7 +4,7 @@
 
 ---
 
-## 当前进度（一眼看懂）
+## 当前进度
 
 | 模块 | 负责人 | 状态 |
 |------|--------|------|
@@ -24,7 +24,7 @@
 | 成员 | 文档 |
 |------|------|
 | A | [`docs/MEMBER-A-后端基础交接.md`](docs/MEMBER-A-后端基础交接.md) |
-| B | [`docs/MEMBER-B-认证与JWT.md`](docs/MEMBER-B-认证与JWT.md) |
+| B | [`docs/MEMBER-B-认证与JWT.md`](docs/MEMBER-B-认证与JWT.md) · [`docs/MEMBER-B-使用文档.md`](docs/MEMBER-B-使用文档.md)（C/D/E） |
 | C | [`docs/MEMBER-C-视频管理.md`](docs/MEMBER-C-视频管理.md) |
 | D | [`docs/MEMBER-D-Feed与点赞.md`](docs/MEMBER-D-Feed与点赞.md) |
 | 全组 | [`docs/团队分工与提交清单.md`](docs/团队分工与提交清单.md) · Postman：[`docs/postman/`](docs/postman/) |
@@ -82,7 +82,7 @@ mvn spring-boot:run
 
 - **不要提交**：`out/`、`backend/target/`、`.idea/`、`application-local.yml`。
 - 队友从 `feat/auth-b`、`feat/video-c` 等分支开发，合并前联调。
-- 历史提交：`849c36f`（骨架）、`f5c0fc9`（A/B 分工文档对齐）。
+- 历史提交：`849c36f`（骨架）→ `f5c0fc9`（分工文档）→ `bf6705b`（A 增强）→ `1434b21`（B 认证/JWT）→ `5026c6a`（B README）。
 
 ---
 

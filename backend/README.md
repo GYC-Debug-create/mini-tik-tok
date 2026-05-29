@@ -23,10 +23,10 @@ mvn spring-boot:run
 |-------|--------|
 | `entity` `mapper` `common`（含 `PageResult`、`FilterOrders`） | A |
 | `filter.RequestLogFilter` `config.FilterConfig` | A |
-| `auth.*` `JwtUtil` `JwtAuthFilter` | **B（待实现）** |
+| `auth.*` `JwtUtil` `JwtAuthFilter` | **B（已完成）** |
 | `controller` 视频 | C |
 | `controller` Feed/Like | D |
 
-详见 `../docs/MEMBER-A-后端基础交接.md`、`../docs/MEMBER-B-认证与JWT.md`、`../docs/MEMBER-C-视频管理.md`、`../docs/MEMBER-D-Feed与点赞.md`。
+详见 `../docs/MEMBER-A-后端基础交接.md`、`../docs/MEMBER-B-认证与JWT.md`、`../docs/MEMBER-B-使用文档.md`（C/D/E 必读）、`../docs/MEMBER-C-视频管理.md`、`../docs/MEMBER-D-Feed与点赞.md`。
 
 日志验收 SQL：`../sql/monitoring-queries.sql`
