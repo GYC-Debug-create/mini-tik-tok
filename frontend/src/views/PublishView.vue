@@ -1,25 +1,27 @@
 <template>
   <div class="page">
-    <h2>发布视频</h2>
+    <h2 class="page-title">发布视频</h2>
 
-    <form class="publish-form" @submit.prevent="handlePublish">
-      <div class="form-item">
-        <label>视频标题：</label>
-        <input v-model="title" type="text" placeholder="请输入视频标题" />
-      </div>
+    <div class="form-card publish-form">
+      <form @submit.prevent="handlePublish">
+        <div class="form-group">
+          <label>视频标题</label>
+          <input v-model="title" type="text" placeholder="请输入视频标题" />
+        </div>
 
-      <div class="form-item">
-        <label>视频地址：</label>
-        <input v-model="videoUrl" type="text" placeholder="请输入视频URL" />
-      </div>
+        <div class="form-group">
+          <label>视频地址</label>
+          <input v-model="videoUrl" type="text" placeholder="请输入视频URL" />
+        </div>
 
-      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+        <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
-      <div class="form-actions">
-        <button type="submit" class="btn-primary">发布</button>
-        <button type="button" class="btn-secondary" @click="handleBack">返回</button>
-      </div>
-    </form>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-block">发布</button>
+          <button type="button" class="btn btn-secondary" @click="handleBack">返回</button>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -68,39 +70,14 @@ function handleBack() {
 </script>
 
 <style scoped>
-.page {
-  padding: 20px;
-}
 .publish-form {
   max-width: 420px;
 }
-.form-item {
-  margin-bottom: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.form-item label {
-  font-weight: 500;
-}
-.form-item input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.error {
-  color: red;
-  min-height: 20px;
-}
+
 .form-actions {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  margin-top: 12px;
-}
-.btn-primary {
-  padding: 8px 20px;
-}
-.btn-secondary {
-  padding: 8px 20px;
+  margin-top: var(--spacing-md);
 }
 </style>
