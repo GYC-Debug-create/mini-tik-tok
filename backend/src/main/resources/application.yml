@@ -1,10 +1,12 @@
-# 本地密码建议：复制 application-example.yml → application-local.yml（已 gitignore）
+
 server:
   port: 8080
 
 spring:
   application:
     name: mini-tiktok-backend
+  profiles:
+    active: local
   datasource:
     url: jdbc:mysql://localhost:3306/douyin_lite?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
@@ -17,7 +19,6 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
-
 # 以下 jwt 配置供成员 B 的 JwtUtil 使用（B 实现认证模块时读取）
 jwt:
   secret: <REDACTED>
