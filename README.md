@@ -8,7 +8,7 @@
 
 | 模块 | 负责人 | 状态 |
 |------|--------|------|
-| 需求/技术设计 v2.1 | 全组 | ✅ 已入仓 |
+| 需求/技术设计 v3.0 | 全组 | ✅（视频存阿里云 OSS，见 §8.2 / 技术 §9） |
 | `sql/init.sql` + `monitoring-queries.sql` | A | ✅ |
 | 后端基础设施（Entity/Mapper/日志/CORS/Result/PageResult） | A | ✅ |
 | `GET /api/health`（含 DB 状态） | A | ✅ |
@@ -29,7 +29,8 @@
 | D | [`docs/MEMBER-D-Feed与点赞.md`](docs/MEMBER-D-Feed与点赞.md) |
 | 全组 | [`docs/团队分工与提交清单.md`](docs/团队分工与提交清单.md) · Postman：[`docs/postman/`](docs/postman/) |
 
-分工基线：`需求规格说明书_v2.1_P0-only开发冻结版.md` §15、`技术设计文档_v2.1_P0-only开发冻结版.md` §13。
+分工基线：`需求规格说明书_v2.1_P0-only开发冻结版.md`（文内 v3.0）、`技术设计文档_v2.1_P0-only开发冻结版.md`（文内 v3.0）§13。  
+视频发布：用户上传 mp4 → 后端上传 **阿里云 OSS** → 数据库存 `video_url`（配置见 `application-example.yml`）。
 
 ---
 
