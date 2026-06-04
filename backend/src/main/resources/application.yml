@@ -1,4 +1,4 @@
-# 本地密码建议：复制 application-example.yml → application-local.yml（已 gitignore）
+
 server:
   port: 8080
 
@@ -7,6 +7,8 @@ spring:
     import: optional:classpath:application-local.yml
   application:
     name: mini-tiktok-backend
+  profiles:
+    active: local
   servlet:
     multipart:
       max-file-size: 100MB
@@ -23,7 +25,6 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
-
 # 以下 jwt 配置供成员 B 的 JwtUtil 使用（B 实现认证模块时读取）
 jwt:
   secret: <REDACTED>
