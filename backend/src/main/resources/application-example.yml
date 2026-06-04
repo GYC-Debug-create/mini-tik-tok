@@ -1,4 +1,4 @@
-# 复制本文件为 application-local.yml（已加入 .gitignore），再修改数据库密码
+# 复制本文件为 application-local.yml（已加入 .gitignore），再修改本地配置
 spring:
   datasource:
     username: root
@@ -6,3 +6,18 @@ spring:
 
 jwt:
   secret: <REDACTED>
+
+alioss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  access-key-id: your-access-key-id
+  access-key-secret: your-access-key-secret
+  bucket-name: java-super-project
+
+# 阿里云 OSS（成员 C 实现上传时使用；密钥勿提交仓库）
+aliyun:
+  oss:
+    endpoint: https://oss-cn-hangzhou.aliyuncs.com
+    bucket: your-bucket-name
+    access-key-id: your-access-key-id
+    access-key-secret: your-access-key-secret
+    url-prefix: https://your-bucket-name.oss-cn-hangzhou.aliyuncs.com

@@ -3,10 +3,16 @@ server:
   port: 8080
 
 spring:
+  config:
+    import: optional:classpath:application-local.yml
   application:
     name: mini-tiktok-backend
   profiles:
     active: local
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
   datasource:
     url: jdbc:mysql://localhost:3306/douyin_lite?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
@@ -29,3 +35,10 @@ app:
     allowed-origins:
       - http://localhost:5173
       - http://127.0.0.1:5173
+
+# OSS 密钥请写入 application-local.yml（已 gitignore）
+alioss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  access-key-id: <REDACTED>
+  access-key-secret: <REDACTED>
+  bucket-name: java-super-project
