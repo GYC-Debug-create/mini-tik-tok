@@ -1,0 +1,15 @@
+spring:
+  config:
+    import: optional:classpath:application-local.yml
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+jwt:
+  secret: <REDACTED>
+  expiration-days: 7
+
+alioss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  access-key-id: integration-test-key
+  access-key-secret: integration-test-secret
+  bucket-name: integration-test-bucket

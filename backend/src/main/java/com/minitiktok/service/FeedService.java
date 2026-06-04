@@ -82,8 +82,7 @@ public class FeedService {
 
     private List<Long> getVisitedVideoIds(Long userId) {
         LambdaQueryWrapper<VisitRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(VisitRecord::getUserId, userId)
-               .select(VisitRecord::getVideoId);
+        wrapper.eq(VisitRecord::getUserId, userId);
         List<VisitRecord> records = visitRecordMapper.selectList(wrapper);
         if (records == null || records.isEmpty()) {
             return Collections.emptyList();

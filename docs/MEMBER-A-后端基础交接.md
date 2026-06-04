@@ -70,7 +70,7 @@ mvn spring-boot:run
 - [x] 骨架、Entity、Mapper、日志 Filter、CORS  
 - [x] 基础设施增强（`bf6705b`）  
 - [x] 成员 B 已合并认证模块（`1434b21`），见 [`MEMBER-B-使用文档.md`](MEMBER-B-使用文档.md)  
-- [ ] **日志联调**（与 B，约 15 分钟，见下节）  
+- [x] **日志联调**（`LogMaskUtilTest` + `ApiIntegrationTest`；人工复核见下节 Postman）  
 - [ ] 通知 C/D 拉 `master`，按 Postman 先 login 再开发  
 - [ ] 第 2 周：C/D 联调时你只 code review，少改别人 Controller  
 
@@ -81,11 +81,11 @@ mvn spring-boot:run
 1. 启动：`cd backend && mvn spring-boot:run`（先执行 `sql/init.sql`）。  
 2. Postman：`POST /api/auth/login`（alice / 123456）→ 确认集合变量 `token` 有值。  
 3. 无 Token：`GET /api/feed/videos/next` → **401**，且 `request_logs` 新增一行（`user_id` 为 NULL）。  
-4. 带 Token：同上请求 → 当前为 **404**（D 未实现属正常）；`user_id` 应为登录用户 ID。  
+4. 带 Token：`GET /api/feed/videos/next` → **200**（D 已实现）；`user_id` 应为登录用户 ID。  
 5. 查表：`sql/monitoring-queries.sql` 或  
    `SELECT response_body, request_params FROM request_logs ORDER BY id DESC LIMIT 3;`  
    → `password`、`token` 字段值应为 `***`，不得出现明文。  
-6. 通过后，在 [`实现状态与待办清单.md`](实现状态与待办清单.md) §4 勾选「日志联调」。
+6. 自动化：`cd backend && mvn test` 会运行 `ApiIntegrationTest`（需 Docker）。
 
 ---
 

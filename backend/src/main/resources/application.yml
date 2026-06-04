@@ -36,7 +36,7 @@ app:
       - http://localhost:5173
       - http://127.0.0.1:5173
 
-# OSS 密钥请写入 application-local.yml（已 gitignore）
+# OSS：密钥最好是写在 application-local.yml（见 application-example.yml），勿提交仓库
 alioss:
   endpoint: oss-cn-beijing.aliyuncs.com
   access-key-id: <REDACTED>

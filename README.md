@@ -14,8 +14,8 @@
 | `GET /api/health`（含 DB 状态） | A | ✅ |
 | 认证 + JWT（3 接口 + Filter） | B | ✅ |
 | 视频 3 接口 + OSS 上传 | C | ✅ |
-| Feed + 点赞 4 接口 | D | ⬜ 待实现 |
-| `frontend/` | E | ⬜ 待建 |
+| Feed + 点赞 4 接口 | D | ✅ |
+| `frontend/` | E | ✅ 骨架；部分页面仍 mock，见 `FRONTEND_PROGRESS.md` |
 
 **完整对照表**：[`docs/实现状态与待办清单.md`](docs/实现状态与待办清单.md)
 
@@ -51,17 +51,43 @@
 
 ## 快速启动（后端）
 
+**方式 A — Docker MySQL（推荐）**
+
+```bash
+docker compose up -d
+cd backend
+# 复制 application-example.yml → application-local.yml，填写数据库密码与 OSS 密钥（上传接口需要）
+mvn spring-boot:run
+```
+
+**方式 B — 本机 MySQL**
+
 ```bash
 mysql -u root -p < sql/init.sql
 cd backend
-# 本地密码勿提交：复制 application-example.yml → application-local.yml 并修改
+# 同上：application-local.yml
 mvn spring-boot:run
 ```
 
 - 健康检查：`GET http://localhost:8080/api/health`（含 `database: up/down`）
 - 日志验收 SQL：见 `sql/monitoring-queries.sql`
 - Postman：导入 `docs/postman/miniTikTok-P0.postman_collection.json`
-- 种子账号（联调 B 登录后）：`alice` / `123456`
+- 种子账号：`alice` / `123456`
+
+### 测试
+
+```bash
+cd backend
+mvn test
+```
+
+| 类型 | 说明 |
+|------|------|
+| 单元测试 | MockMvc standalone / Mockito，**无需** MySQL |
+| 集成测试 | `ApiIntegrationTest`（Testcontainers MySQL），**需要 Docker**；无 Docker 时自动跳过 |
+| API 联调 | Postman 集合，需先 `mvn spring-boot:run` + 数据库 |
+
+OSS：仅 `POST /api/videos/upload` 需要有效 `alioss.*`；用 JSON 发布可只填 `videoUrl`（`POST /api/videos`）。
 
 ---
 
@@ -96,7 +122,8 @@ mvn spring-boot:run
 | `sql/init.sql` | A | 建库脚本 |
 | `sql/monitoring-queries.sql` | A | 答辩用 `request_logs` 查询示例 |
 | `backend/` | A 骨架；B/C/D 填业务 | Spring Boot |
-| `frontend/` | E（待建） | Vue3 |
+| `frontend/` | E | Vue3 + Vite |
+| `docker-compose.yml` | 全组 | 本地 MySQL 8 |
 | `docs/MEMBER-*.md` | 各成员 | 交接说明 |
 | `docs/实现状态与待办清单.md` | 全组 | 接口与文件待办矩阵 |
 
