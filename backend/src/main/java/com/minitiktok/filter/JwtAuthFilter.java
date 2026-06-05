@@ -40,6 +40,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 公开路径直接放行
         if (ApiConstants.isPublicPath(path)) {
             filterChain.doFilter(request, response);

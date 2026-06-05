@@ -40,7 +40,7 @@ public class FeedService {
 
         Video video = videoMapper.selectOne(wrapper);
         if (video == null) {
-            return null;
+            return getMostRecentVisitedVideo(userId);
         }
 
         writeVisitRecord(userId, video.getId());
@@ -95,7 +95,8 @@ public class FeedService {
     private List<VisitRecord> getVisitRecordsDesc(Long userId) {
         LambdaQueryWrapper<VisitRecord> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(VisitRecord::getUserId, userId)
-               .orderByDesc(VisitRecord::getViewedAt);
+               .orderByDesc(VisitRecord::getViewedAt)
+               .orderByDesc(VisitRecord::getId);
         return visitRecordMapper.selectList(wrapper);
     }
 
@@ -123,6 +124,22 @@ public class FeedService {
             visitRecordMapper.insert(record);
         } catch (DuplicateKeyException ignored) {
         }
+    }
+
+    /**
+     * 推荐池为空时回退:遍历历史记录,返回最近一条正常状态的视频。
+     * 遍历由近及远(getVisitRecordsDesc 顺序),跳过已删除视频。
+     */
+    private FeedVideoDTO getMostRecentVisitedVideo(Long userId) {
+        List<VisitRecord> records = getVisitRecordsDesc(userId);
+        for (VisitRecord record : records) {
+            Video video = videoMapper.selectById(record.getVideoId());
+            if (video != null && video.getStatus() != null
+                    && video.getStatus() == VideoConstants.STATUS_NORMAL) {
+                return buildFeedVideoDTO(video);
+            }
+        }
+        return null;
     }
 
     private FeedVideoDTO buildFeedVideoDTO(Video video) {

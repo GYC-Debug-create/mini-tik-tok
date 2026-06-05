@@ -24,16 +24,10 @@ public class OssService {
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("mp4", "webm", "mov", "avi", "mkv");
 
     private final OssProperties ossProperties;
-    private final OSS ossClient;
+    private volatile OSS ossClient;
 
     public OssService(OssProperties ossProperties) {
         this.ossProperties = ossProperties;
-        validateConfig();
-        this.ossClient = new OSSClientBuilder().build(
-                ossProperties.getEndpoint(),
-                ossProperties.getAccessKeyId(),
-                ossProperties.getAccessKeySecret()
-        );
     }
 
     public String upload(MultipartFile file, Long userId) {
@@ -42,6 +36,9 @@ public class OssService {
         }
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new BusinessException(400, "视频文件大小不能超过100MB");
+        }
+        if (!isConfigured()) {
+            throw new BusinessException(503, "OSS 未配置，请改用视频地址方式发布");
         }
 
         String extension = resolveExtension(file);
@@ -54,13 +51,20 @@ public class OssService {
         }
 
         try {
-            ossClient.putObject(ossProperties.getBucketName(), objectKey, file.getInputStream(), metadata);
+            getClient().putObject(ossProperties.getBucketName(), objectKey, file.getInputStream(), metadata);
         } catch (IOException ex) {
             log.error("OSS 上传失败, objectKey={}", objectKey, ex);
             throw new BusinessException(500, "视频上传失败");
         }
 
         return buildPublicUrl(objectKey);
+    }
+
+    public boolean isConfigured() {
+        return StringUtils.hasText(ossProperties.getEndpoint())
+                && StringUtils.hasText(ossProperties.getAccessKeyId())
+                && StringUtils.hasText(ossProperties.getAccessKeySecret())
+                && StringUtils.hasText(ossProperties.getBucketName());
     }
 
     String buildPublicUrl(String objectKey) {
@@ -78,13 +82,22 @@ public class OssService {
         throw new BusinessException(400, "不支持的视频格式，仅支持: mp4, webm, mov, avi, mkv");
     }
 
-    private void validateConfig() {
-        if (!StringUtils.hasText(ossProperties.getEndpoint())
-                || !StringUtils.hasText(ossProperties.getAccessKeyId())
-                || !StringUtils.hasText(ossProperties.getAccessKeySecret())
-                || !StringUtils.hasText(ossProperties.getBucketName())) {
-            throw new IllegalStateException("OSS 配置不完整，请检查 alioss.* 配置项");
+    private OSS getClient() {
+        OSS local = ossClient;
+        if (local == null) {
+            synchronized (this) {
+                local = ossClient;
+                if (local == null) {
+                    local = new OSSClientBuilder().build(
+                            ossProperties.getEndpoint(),
+                            ossProperties.getAccessKeyId(),
+                            ossProperties.getAccessKeySecret()
+                    );
+                    ossClient = local;
+                }
+            }
         }
+        return local;
     }
 
     @PreDestroy
