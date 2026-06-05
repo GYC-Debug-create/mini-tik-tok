@@ -10,10 +10,12 @@
     </div>
 
     <!-- 空状态 -->
-    <p v-if="myVideos.length === 0" class="empty-state">暂无视频</p>
+    <p v-if="loading" class="empty-state">加载中...</p>
+    <p v-else-if="myVideos.length === 0" class="empty-state">暂无视频</p>
+    <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
     <!-- 视频卡片网格 -->
-    <div v-else class="video-grid">
+    <div v-if="myVideos.length > 0" class="video-grid">
       <div v-for="video in myVideos" :key="video.id" class="video-card">
         <div class="card-cover">
           <video
@@ -43,10 +45,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getMyVideos, deleteVideo } from '../api/video'
 
 const router = useRouter()
 
 const myVideos = ref([])
+const loading = ref(false)
+const errorMessage = ref('')
 
 const page = ref(1)
 const pageSize = ref(9)
@@ -54,31 +59,21 @@ const total = ref(0)
 
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
 
-// ---- mock 数据（后端就绪后删除此段，恢复 API 调用） ----
-const mockStore = [
-  { id: 1, title: '扣篮集锦 — Slam Dunk', videoUrl: 'https://cdn.coverr.co/videos/coverr-slow-mo-basketball-hoop-5187/1080p.mp4' },
-  { id: 2, title: '一对一单挑 — One on One', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' },
-  { id: 3, title: '投篮训练 — Shooting Practice', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4' },
-  { id: 4, title: '街球花式 — Street Moves', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4' },
-  { id: 5, title: '三分大赛 — Three Point Contest', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4' },
-  { id: 6, title: '火锅大帽 — Block Party', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
-  { id: 7, title: '空中接力 — Alley Oop', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' },
-  { id: 8, title: '背后运球 — Behind the Back', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4' },
-  { id: 9, title: '欧洲步上篮 — Euro Step', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4' },
-  { id: 10, title: '后仰跳投 — Fadeaway', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4' },
-  { id: 11, title: '变向过人 — Crossover', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
-  { id: 12, title: '打板三分 — Bank Shot', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' }
-]
-
-function fetchPage() {
-  // [mock] 模拟 getMyVideos({ page, pageSize }) 返回值
-  // 后端就绪后替换为：
-  //   const res = await getMyVideos({ page: page.value, pageSize: pageSize.value })
-  //   myVideos.value = res.data.data.records
-  //   total.value = res.data.data.total
-  const start = (page.value - 1) * pageSize.value
-  myVideos.value = mockStore.slice(start, start + pageSize.value)
-  total.value = mockStore.length
+async function fetchPage() {
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    const res = await getMyVideos({ page: page.value, pageSize: pageSize.value })
+    const data = res.data?.data
+    myVideos.value = data?.items || []
+    total.value = data?.total || 0
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || '加载失败'
+    myVideos.value = []
+    total.value = 0
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(() => {
@@ -90,20 +85,18 @@ function goToPage(newPage) {
   fetchPage()
 }
 
-function handleDelete(videoId) {
-  // [mock] 模拟 deleteVideo(videoId) 成功
-  // 后端就绪后替换为：
-  //   await deleteVideo(videoId)
-  //   fetchPage()
-  const index = mockStore.findIndex(v => v.id === videoId)
-  if (index !== -1) {
-    mockStore.splice(index, 1)
+async function handleDelete(videoId) {
+  if (!confirm('确认删除该视频？')) return
+  errorMessage.value = ''
+  try {
+    await deleteVideo(videoId)
+    if (myVideos.value.length === 1 && page.value > 1) {
+      page.value -= 1
+    }
+    await fetchPage()
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || '删除失败'
   }
-  const maxPage = Math.max(1, Math.ceil(mockStore.length / pageSize.value))
-  if (page.value > maxPage) {
-    page.value = maxPage
-  }
-  fetchPage()
 }
 
 function goToPublish() {

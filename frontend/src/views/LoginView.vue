@@ -68,8 +68,14 @@ async function handleSubmit() {
   errorMessage.value = ''
 
   try {
-    const currentAuthAction = isLogin.value ? login : register
-    const response = await currentAuthAction({
+    if (!isLogin.value) {
+      await register({
+        username: form.username,
+        password: form.password
+      })
+    }
+
+    const response = await login({
       username: form.username,
       password: form.password
     })

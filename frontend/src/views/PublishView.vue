@@ -17,7 +17,9 @@
         <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary btn-block">发布</button>
+          <button type="submit" class="btn btn-primary btn-block" :disabled="submitting">
+            {{ submitting ? '发布中...' : '发布' }}
+          </button>
           <button type="button" class="btn btn-secondary" @click="handleBack">返回</button>
         </div>
       </form>
@@ -28,14 +30,16 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { publishVideo } from '../api/video'
 
 const router = useRouter()
 
 const title = ref('')
 const videoUrl = ref('')
 const errorMessage = ref('')
+const submitting = ref(false)
 
-function handlePublish() {
+async function handlePublish() {
   errorMessage.value = ''
 
   if (!title.value.trim()) {
@@ -47,10 +51,7 @@ function handlePublish() {
     return
   }
 
-  // [mock] 模拟 publishVideo 成功，后端就绪后替换为下方 try/catch
-  router.push('/my-videos')
-
-  /*
+  submitting.value = true
   try {
     await publishVideo({
       title: title.value.trim(),
@@ -60,8 +61,9 @@ function handlePublish() {
   } catch (error) {
     const message = error.response?.data?.message || '发布失败，请检查网络'
     errorMessage.value = message
+  } finally {
+    submitting.value = false
   }
-  */
 }
 
 function handleBack() {

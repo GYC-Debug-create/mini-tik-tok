@@ -9,8 +9,14 @@
         class="video-player"
       ></video>
 
-      <div class="video-info">
-        <p class="video-author">@{{ currentVideo.publisher?.username }}</p>
+      <div v-if="!currentVideo.id && !loading" class="empty-tip">
+        {{ emptyMessage || '暂无推荐视频' }}
+      </div>
+      <div v-if="loading" class="empty-tip">加载中...</div>
+      <div v-if="toastMessage" class="toast-tip">{{ toastMessage }}</div>
+
+      <div v-if="currentVideo.id" class="video-info">
+        <p class="video-author">@{{ currentVideo.publisher?.username || '匿名' }}</p>
         <h3 class="video-title">{{ currentVideo.title }}</h3>
       </div>
 
@@ -18,18 +24,19 @@
         <button
           class="btn action-btn"
           :class="{ liked: likedMap[currentVideo.id] }"
+          :disabled="!currentVideo.id"
           @click="handleLike"
         >
           <span class="action-icon">♥</span>
-          <span class="action-label">{{ currentVideo.likeCount }}</span>
+          <span class="action-label">{{ currentVideo.likeCount || 0 }}</span>
         </button>
 
-        <button class="btn action-btn" @click="handlePrevious">
+        <button class="btn action-btn" :disabled="!currentVideo.id || loading" @click="handlePrevious">
           <span class="action-icon">▲</span>
           <span class="action-label">上一条</span>
         </button>
 
-        <button class="btn action-btn" @click="handleNext">
+        <button class="btn action-btn" :disabled="loading" @click="handleNext">
           <span class="action-icon">▼</span>
           <span class="action-label">下一条</span>
         </button>
@@ -41,87 +48,177 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onBeforeUnmount, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { removeToken } from '../utils/token'
+import { getForwardVideo, getNextVideo, getPreviousVideo } from '../api/feed'
+import { likeVideo } from '../api/video'
 
 const currentVideo = ref({
   id: null,
-  title: '加载中...',
+  title: '',
   videoUrl: '',
   likeCount: 0,
   publisher: { username: '' }
 })
+const loading = ref(false)
+const emptyMessage = ref('')
+const toastMessage = ref('')
+const history = ref([])
+const historyIndex = ref(-1)
+const serverHistoryMode = ref(false)
+const likedMap = reactive({})
+let toastTimer = null
 
-// TODO: 联调后替换为真实推荐流接口。
-const mockVideos = [
-  {
-    id: 1,
-    title: '扣篮集锦 — Slam Dunk',
-    videoUrl: 'https://assets.mixkit.co/videos/2289/2289-720.mp4',
-    likeCount: 328,
-    publisher: { username: '篮球少年' }
-  },
-  {
-    id: 2,
-    title: '一对一单挑 — One on One',
-    videoUrl: 'https://assets.mixkit.co/videos/44468/44468-720.mp4',
-    likeCount: 156,
-    publisher: { username: '街球手' }
-  },
-  {
-    id: 3,
-    title: '投篮训练 — Shooting Practice',
-    videoUrl: 'https://assets.mixkit.co/videos/746/746-720.mp4',
-    likeCount: 89,
-    publisher: { username: '投篮教练' }
-  }
-]
-let mockIndex = 0
-
-onMounted(() => {
-  currentVideo.value = mockVideos[0]
-})
+const canGoPrevious = computed(() => historyIndex.value > 0)
+const canGoForward = computed(() => historyIndex.value >= 0 && historyIndex.value < history.value.length - 1)
 
 const router = useRouter()
 
-function handlePrevious() {
-  if (mockIndex > 0) {
-    mockIndex--
-  } else {
-    mockIndex = mockVideos.length - 1
-  }
-  currentVideo.value = mockVideos[mockIndex]
+function setCurrent(video) {
+  currentVideo.value = video
+  emptyMessage.value = ''
+  toastMessage.value = ''
 }
 
-function handleNext() {
-  if (mockIndex < mockVideos.length - 1) {
-    mockIndex++
-    currentVideo.value = mockVideos[mockIndex]
-  } else {
-    mockIndex = 0
-    currentVideo.value = mockVideos[0]
+function showToast(message) {
+  toastMessage.value = message
+  if (toastTimer) {
+    clearTimeout(toastTimer)
   }
+  toastTimer = setTimeout(() => {
+    toastMessage.value = ''
+    toastTimer = null
+  }, 2200)
 }
 
-const likedMap = reactive({})
-
-function handleLike() {
-  const videoId = currentVideo.value.id
-
-  if (likedMap[videoId]) {
-    alert('已经点过赞了')
+async function loadNext() {
+  if (canGoForward.value) {
+    historyIndex.value += 1
+    setCurrent(history.value[historyIndex.value])
     return
   }
 
-  likedMap[videoId] = true
-  currentVideo.value.likeCount++
+  loading.value = true
+  emptyMessage.value = ''
+  try {
+    const res = await getNextVideo()
+    const video = res.data?.data
+    if (!video?.id) {
+      if (currentVideo.value.id) {
+        showToast(res.data?.message || '暂无更多推荐视频')
+      } else {
+        emptyMessage.value = res.data?.message || '暂无更多推荐视频'
+      }
+      return
+    }
+    // 兜底返回了当前正在看的视频 → 说明已是最后一个
+    if (currentVideo.value.id && video.id === currentVideo.value.id) {
+      showToast('已是最后一个视频')
+      return
+    }
+    history.value.push(video)
+    historyIndex.value = history.value.length - 1
+    serverHistoryMode.value = false
+    setCurrent(video)
+  } catch (error) {
+    const message = error.response?.data?.message || '推荐流加载失败'
+    if (currentVideo.value.id) {
+      showToast(message)
+    } else {
+      emptyMessage.value = message
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+async function handlePrevious() {
+  if (!currentVideo.value.id || loading.value) return
+  if (canGoPrevious.value) {
+    historyIndex.value -= 1
+    setCurrent(history.value[historyIndex.value])
+    return
+  }
+
+  loading.value = true
+  try {
+    const res = await getPreviousVideo(currentVideo.value.id)
+    const video = res.data?.data
+    if (!video?.id) {
+      showToast(res.data?.message || '已是第一个视频')
+      return
+    }
+    serverHistoryMode.value = true
+    setCurrent(video)
+  } catch (error) {
+    showToast(error.response?.data?.message || '上一条加载失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+function handleNext() {
+  if (serverHistoryMode.value && currentVideo.value.id && !canGoForward.value) {
+    loadForward()
+    return
+  }
+  loadNext()
+}
+
+async function loadForward() {
+  loading.value = true
+  try {
+    const res = await getForwardVideo(currentVideo.value.id)
+    const video = res.data?.data
+    if (!video?.id) {
+      serverHistoryMode.value = false
+      showToast(res.data?.message || '已是最近浏览的视频')
+      return
+    }
+    setCurrent(video)
+    const localCurrent = history.value[historyIndex.value]
+    if (localCurrent?.id === video.id) {
+      serverHistoryMode.value = false
+    }
+  } catch (error) {
+    showToast(error.response?.data?.message || '下一条加载失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function handleLike() {
+  const videoId = currentVideo.value.id
+  if (!videoId) return
+  if (likedMap[videoId]) {
+    showToast('已经点过赞了')
+    return
+  }
+
+  try {
+    await likeVideo(videoId)
+    likedMap[videoId] = true
+    currentVideo.value.likeCount = (currentVideo.value.likeCount || 0) + 1
+  } catch (error) {
+    showToast(error.response?.data?.message || '点赞失败')
+  }
 }
 
 function handleLogout() {
   removeToken()
   router.push('/login')
 }
+
+onMounted(() => {
+  loadNext()
+})
+
+onBeforeUnmount(() => {
+  if (toastTimer) {
+    clearTimeout(toastTimer)
+  }
+})
 </script>
 
 <style scoped>
@@ -163,6 +260,36 @@ function handleLogout() {
   object-position: center center;
   background: #000;
   display: block;
+}
+
+.empty-tip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  text-align: center;
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+}
+
+.toast-tip {
+  position: absolute;
+  top: 64px;
+  left: 50%;
+  z-index: 30;
+  max-width: calc(100% - 48px);
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border-radius: 18px;
+  background: rgba(22, 24, 35, 0.72);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: center;
+  pointer-events: none;
 }
 
 /* ============================================
@@ -237,6 +364,11 @@ function handleLogout() {
 
 .action-btn.liked {
   color: var(--color-primary);
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* ============================================
